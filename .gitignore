@@ -40,3 +40,6 @@ yarn-error.log*
 npm-cache/
  bun.lock
 package.json.bak*
+npm-cache/
+bun.lock
+package.json.bak*
