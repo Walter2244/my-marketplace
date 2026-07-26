@@ -43,3 +43,7 @@ package.json.bak*
 npm-cache/
 bun.lock
 package.json.bak*
+git-objects.txt
+largest-git-objects.txt
+git-objects.txt
+largest-git-objects.txt
