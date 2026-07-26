@@ -1,0 +1,4 @@
+git checkout -b add-ci-workflow
+git add .github/workflows/ci.yml
+git commit -m "chore(ci): add GitHub Actions CI workflow"
+git push -u origin add-ci-workflow
