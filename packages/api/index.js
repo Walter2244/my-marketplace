@@ -1,5 +1,6 @@
 require("dotenv").config();
-const express = require("express");
+const express = require('express');
+const cookieParser = require('cookie-parser');
 const cors = require("cors");
 
 // Import route modules
@@ -8,6 +9,7 @@ const adminRoutes = require("./routes/admin");
 
 // Initialize Express app
 const app = express();
+app.use(cookieParser());
 
 // Configure CORS to allow dashboard access
 app.use(cors({
