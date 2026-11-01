@@ -3,62 +3,103 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+}
+
 model Vendor {
-  id         Int       @id @default(autoincrement())
-  name       String
-  email      String    @unique
-  password   String
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  products   Product[]
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  store     Store?
+  products  Product[]
+}
+
+model Store {
+  id          Int      @id @default(autoincrement())
+  vendor      Vendor   @relation(fields: [vendorId], references: [id])
+  vendorId    Int      @unique
+  name        String
+  city        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id        Int        @id @default(autoincrement())
+  name      String
+  slug      String     @unique
+  level     Int
+  parentId  Int?
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryTree")
+  products  Product[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 model User {
-  id         Int       @id @default(autoincrement())
-  name       String?
-  email      String    @unique
-  password   String
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  orders     Order[]
+  id        Int      @id @default(autoincrement())
+  name      String?
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
 }
 
 model Product {
-  id          Int       @id @default(autoincrement())
-  vendor       Vendor   @relation(fields: [vendorId], references: [id])
-  vendorId     Int
-  title        String
-  description  String?
-  priceCents   Int
-  currency     String    @default("USD")
-  quantity     Int       @default(0)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  orderItems   OrderItem[]
+  id          Int           @id @default(autoincrement())
+  vendor      Vendor        @relation(fields: [vendorId], references: [id])
+  vendorId    Int
+  category    Category?     @relation(fields: [categoryId], references: [id])
+  categoryId  Int?
+  status      ProductStatus @default(DRAFT)
+  title       String
+  description String?
+  priceCents  Int
+  currency    String        @default("USD")
+  quantity    Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  orderItems  OrderItem[]
 }
 
 model Order {
-  id          Int        @id @default(autoincrement())
-  user        User       @relation(fields: [userId], references: [id])
-  userId      Int
-  totalCents  Int
-  currency    String     @default("USD")
-  status      String     @default("PENDING")
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  items       OrderItem[]
+  id         Int         @id @default(autoincrement())
+  user       User        @relation(fields: [userId], references: [id])
+  userId     Int
+  totalCents Int
+  currency   String      @default("USD")
+  status     String      @default("PENDING")
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  items      OrderItem[]
 }
 
 model OrderItem {
-  id         Int      @id @default(autoincrement())
-  order      Order    @relation(fields: [orderId], references: [id])
-  orderId    Int
-  product    Product  @relation(fields: [productId], references: [id])
-  productId  Int
-  quantity   Int
-  unitCents  Int
+  id        Int     @id @default(autoincrement())
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  quantity  Int
+  unitCents Int
 }
