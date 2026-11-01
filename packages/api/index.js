@@ -6,6 +6,7 @@ const cors = require("cors");
 // Import route modules
 const vendorRoutes = require("./routes/vendor");
 const adminRoutes = require("./routes/admin");
+const productRoutes = require("./routes/product");
 
 // Initialize Express app
 const app = express();
@@ -20,7 +21,7 @@ app.use(cors({
     "http://192.168.1.241:5173",
     "https://192.168.1.241:7000"
   ],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
@@ -42,6 +43,7 @@ app.get("/health", (req, res) => {
 // Mount routes
 app.use("/vendor", vendorRoutes);
 app.use("/auth", adminRoutes);
+app.use("/products", productRoutes);
 
 // Robust route printer for startup debugging
 function printRegisteredRoutes() {
@@ -102,3 +104,4 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 module.exports = app;
+
