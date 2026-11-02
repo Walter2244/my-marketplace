@@ -1,6 +1,7 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const { verifyVendorToken } = require("../middleware/auth");
+const { withStock, publicStock } = require("../lib/stock");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -78,7 +79,7 @@ router.post("/", verifyVendorToken, async (req, res) => {
       include: productInclude,
     });
 
-    res.status(201).json(product);
+    res.status(201).json(withStock(product));
   } catch (err) {
     console.error("Create product failed:", err);
     res.status(500).json({ error: "Could not create product" });
@@ -98,7 +99,7 @@ router.get("/mine", verifyVendorToken, async (req, res) => {
       orderBy: { createdAt: "desc" },
       include: productInclude,
     });
-    res.json(products);
+    res.json(products.map(withStock));
   } catch (err) {
     console.error("List own products failed:", err);
     res.status(500).json({ error: "Could not load products" });
@@ -130,7 +131,7 @@ router.get("/", async (req, res) => {
       orderBy: { createdAt: "desc" },
       include: productInclude,
     });
-    res.json(products);
+    res.json(products.map(publicStock));
   } catch (err) {
     console.error("List products failed:", err);
     res.status(500).json({ error: "Could not load products" });
@@ -148,7 +149,7 @@ router.get("/:id", async (req, res) => {
       include: productInclude,
     });
     if (!product) return res.status(404).json({ error: "Product not found" });
-    res.json(product);
+    res.json(publicStock(product));
   } catch (err) {
     console.error("Get product failed:", err);
     res.status(500).json({ error: "Could not load product" });
@@ -230,7 +231,7 @@ router.patch("/:id", verifyVendorToken, async (req, res) => {
     }
 
     const product = await prisma.product.update({ where: { id }, data, include: productInclude });
-    res.json(product);
+    res.json(withStock(product));
   } catch (err) {
     console.error("Update product failed:", err);
     res.status(500).json({ error: "Could not update product" });
@@ -262,3 +263,4 @@ router.delete("/:id", verifyVendorToken, async (req, res) => {
 });
 
 module.exports = router;
+

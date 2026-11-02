@@ -9,6 +9,7 @@ const adminRoutes = require("./routes/admin");
 const productRoutes = require("./routes/product");
 const storeRoutes = require("./routes/store");
 const categoryRoutes = require("./routes/category");
+const inventoryRoutes = require("./routes/inventory");
 
 // Initialize Express app
 const app = express();
@@ -48,6 +49,7 @@ app.use("/auth", adminRoutes);
 app.use("/products", productRoutes);
 app.use("/stores", storeRoutes);
 app.use("/categories", categoryRoutes);
+app.use("/products", inventoryRoutes);
 
 // Robust route printer for startup debugging
 function printRegisteredRoutes() {
