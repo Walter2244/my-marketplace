@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+const { JWT_SECRET } = require("../lib/config");
 
 // Middleware: protect admin routes
 async function verifyAdminToken(req, res, next) {
