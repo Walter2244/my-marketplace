@@ -6,7 +6,7 @@ const { verifyAdminToken } = require("../middleware/admin");
 
 const router = express.Router();
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+const { JWT_SECRET } = require("../lib/config");
 
 // Admin login
 router.post("/login", async (req, res) => {

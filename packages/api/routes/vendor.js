@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 
 const prisma = new PrismaClient();
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+const { JWT_SECRET } = require("../lib/config");
 const TOKEN_EXPIRY = "2h";
 
 // Helper: create JWT for vendor
@@ -79,5 +79,6 @@ router.get("/me", verifyVendorToken, async (req, res) => {
 });
 
 module.exports = router;
+
 
 
