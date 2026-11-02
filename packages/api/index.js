@@ -7,6 +7,7 @@ const cors = require("cors");
 const vendorRoutes = require("./routes/vendor");
 const adminRoutes = require("./routes/admin");
 const productRoutes = require("./routes/product");
+const storeRoutes = require("./routes/store");
 
 // Initialize Express app
 const app = express();
@@ -44,6 +45,7 @@ app.get("/health", (req, res) => {
 app.use("/vendor", vendorRoutes);
 app.use("/auth", adminRoutes);
 app.use("/products", productRoutes);
+app.use("/stores", storeRoutes);
 
 // Robust route printer for startup debugging
 function printRegisteredRoutes() {
