@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const prisma = new PrismaClient();
 const router = express.Router();
 const { JWT_SECRET } = require("../lib/config");
+const { loginLimiter } = require("../middleware/rateLimit");
 const TOKEN_EXPIRY = "2h";
 
 // Helper: create JWT for vendor
@@ -31,7 +32,7 @@ async function verifyVendorToken(req, res, next) {
 }
 
 // Register vendor
-router.post("/register", async (req, res) => {
+router.post("/register", loginLimiter, async (req, res) => {
   try {
     const { name, email, password } = req.body;
     if (!name || !email || !password) return res.status(400).json({ error: "name, email and password are required" });
@@ -53,7 +54,7 @@ router.post("/register", async (req, res) => {
 });
 
 // Vendor login
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: "email and password are required" });
@@ -79,6 +80,7 @@ router.get("/me", verifyVendorToken, async (req, res) => {
 });
 
 module.exports = router;
+
 
 
 
