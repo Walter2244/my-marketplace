@@ -7,9 +7,10 @@ const { verifyAdminToken } = require("../middleware/admin");
 const router = express.Router();
 const prisma = new PrismaClient();
 const { JWT_SECRET } = require("../lib/config");
+const { loginLimiter } = require("../middleware/rateLimit");
 
 // Admin login
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ error: "email and password are required" });
@@ -44,3 +45,4 @@ router.get("/stats", verifyAdminToken, async (req, res) => {
 });
 
 module.exports = router;
+
