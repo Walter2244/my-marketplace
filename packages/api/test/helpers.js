@@ -19,7 +19,7 @@ let server = null;
 async function startServer() {
   server = spawn(process.execPath, ["index.js"], {
     cwd: path.join(__dirname, ".."),
-    env: { ...process.env, PORT: String(PORT), LOGIN_RATE_LIMIT: "1000" },
+    env: { ...process.env, PORT: String(PORT), LOGIN_RATE_LIMIT: "1000", UPLOAD_DIR: path.join(__dirname, "..", "uploads-test") },
     stdio: "inherit",
   });
   for (let attempt = 0; attempt < 50; attempt++) {
@@ -73,4 +73,5 @@ async function api(method, route, { token, body } = {}) {
 }
 
 module.exports = { BASE, prisma, startServer, stopServer, resetDatabase, createAdmin, api };
+
 
