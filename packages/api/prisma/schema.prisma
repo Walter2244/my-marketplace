@@ -80,6 +80,7 @@ model Product {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   orderItems  OrderItem[]
+  images      ProductImage[]
 }
 
 model Order {
@@ -102,4 +103,17 @@ model OrderItem {
   productId Int
   quantity  Int
   unitCents Int
+}
+
+model ProductImage {
+  id        Int      @id @default(autoincrement())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  position  Int
+  filePath  String
+  mimeType  String
+  sizeBytes Int
+  createdAt DateTime @default(now())
+
+  @@unique([productId, position])
 }
