@@ -1,7 +1,7 @@
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const h = require("./helpers");
-const { createVendor, adminToken } = require("./fixtures");
+const { createVendor, adminToken, address } = require("./fixtures");
 
 let buyer;
 let product;
@@ -13,7 +13,7 @@ async function stockOf(id) {
 
 async function addAndCheckout(token, productId, quantity) {
   await h.api("POST", "/cart/items", { token, body: { productId, quantity } });
-  return h.api("POST", "/orders/checkout", { token });
+  return h.api("POST", "/orders/checkout", { token, body: { delivery: address } });
 }
 
 before(async () => {
@@ -49,7 +49,7 @@ test("checkout turns the cart into an order, reserves stock and empties the cart
 });
 
 test("checkout with an empty cart is refused", async () => {
-  const res = await h.api("POST", "/orders/checkout", { token: buyer });
+  const res = await h.api("POST", "/orders/checkout", { token: buyer, body: { delivery: address } });
   assert.equal(res.status, 400);
 });
 
@@ -87,7 +87,7 @@ test("checkout refuses a cart that asks for more than is in stock", async () => 
   const available = await stockOf(product.id);
   await h.api("POST", "/cart/items", { token: buyer, body: { productId: product.id, quantity: 1 } });
   await h.prisma.product.update({ where: { id: product.id }, data: { quantity: 0 } });
-  const res = await h.api("POST", "/orders/checkout", { token: buyer });
+  const res = await h.api("POST", "/orders/checkout", { token: buyer, body: { delivery: address } });
   assert.equal(res.status, 409);
   await h.prisma.product.update({ where: { id: product.id }, data: { quantity: available } });
 });
@@ -119,4 +119,5 @@ test("expiry leaves orders that are not yet due", async () => {
   const order = await h.prisma.order.findUnique({ where: { id: res.data.id } });
   assert.equal(order.status, "PENDING_PAYMENT");
 });
+
 

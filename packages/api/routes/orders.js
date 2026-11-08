@@ -56,6 +56,19 @@ const orderInclude = {
 // Turn the buyer's cart into an order. The stock reduction and the order are written together.
 router.post("/checkout", verifyBuyerToken, async (req, res) => {
   try {
+    const address = req.body && req.body.delivery;
+    const requiredFields = ["name", "phone", "line1", "city", "postalCode", "country"];
+    if (!address || typeof address !== "object") {
+      return res.status(400).json({ error: "a delivery address is required" });
+    }
+    const missing = requiredFields.filter((k) => typeof address[k] !== "string" || !address[k].trim());
+    if (missing.length > 0) {
+      return res.status(400).json({ error: `delivery address is missing: ${missing.join(", ")}` });
+    }
+    const optionalLength = (value, max) => value === undefined || value === null || (typeof value === "string" && value.length <= max);
+    if (!optionalLength(address.line2, 200) || address.name.length > 120 || address.phone.length > 30) {
+      return res.status(400).json({ error: "delivery address has a field that is too long" });
+    }
     const cart = await prisma.cart.findUnique({
       where: { userId: req.user.id },
       include: { items: { include: { product: true } } },
@@ -105,6 +118,13 @@ router.post("/checkout", verifyBuyerToken, async (req, res) => {
           totalCents,
           currency,
           expiresAt: new Date(Date.now() + EXPIRY_MS),
+          deliveryName: address.name.trim(),
+          deliveryPhone: address.phone.trim(),
+          deliveryLine1: address.line1.trim(),
+          deliveryLine2: address.line2 ? address.line2.trim() : null,
+          deliveryCity: address.city.trim(),
+          deliveryPostalCode: address.postalCode.trim(),
+          deliveryCountry: address.country.trim(),
         },
       });
 
@@ -207,5 +227,7 @@ router.post("/:id/cancel", verifyBuyerToken, async (req, res) => {
   }
 });
 module.exports = router;
+
+
 
 
