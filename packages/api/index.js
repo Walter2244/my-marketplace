@@ -13,6 +13,7 @@ const inventoryRoutes = require("./routes/inventory");
 const imageRoutes = require("./routes/productImages");
 const searchRoutes = require("./routes/search");
 const buyerRoutes = require("./routes/buyer");
+const cartRoutes = require("./routes/cart");
 
 // Initialize Express app
 const app = express();
@@ -56,6 +57,7 @@ app.use("/products", inventoryRoutes);
 app.use("/products", imageRoutes);
 app.use("/search", searchRoutes);
 app.use("/buyers", buyerRoutes);
+app.use("/cart", cartRoutes);
 
 // Robust route printer for startup debugging
 function printRegisteredRoutes() {
@@ -116,6 +118,7 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 module.exports = app;
+
 
 
 
