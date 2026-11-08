@@ -21,4 +21,14 @@ async function adminToken(email, password) {
   return res.data.token;
 }
 
-module.exports = { createVendor, adminToken };
+// A complete delivery address, used by every test that places an order
+const address = {
+  name: "Test Buyer",
+  phone: "+263770000000",
+  line1: "1 Test Road",
+  city: "Harare",
+  postalCode: "00000",
+  country: "Zimbabwe",
+};
+
+module.exports = { createVendor, adminToken, address };

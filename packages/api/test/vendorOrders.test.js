@@ -1,7 +1,7 @@
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
 const h = require("./helpers");
-const { createVendor } = require("./fixtures");
+const { createVendor, address } = require("./fixtures");
 
 let vendorA;
 let vendorB;
@@ -32,7 +32,7 @@ before(async () => {
   buyer = reg.data.token;
   await h.api("POST", "/cart/items", { token: buyer, body: { productId: pa.data.id, quantity: 1 } });
   await h.api("POST", "/cart/items", { token: buyer, body: { productId: pb.data.id, quantity: 1 } });
-  const checkout = await h.api("POST", "/orders/checkout", { token: buyer });
+  const checkout = await h.api("POST", "/orders/checkout", { token: buyer, body: { delivery: address } });
   orderId = checkout.data.id;
   subA = checkout.data.subOrders.find((s) => s.vendor.id === vendorA.id).id;
   subB = checkout.data.subOrders.find((s) => s.vendor.id === vendorB.id).id;
@@ -85,3 +85,4 @@ test("a paid order ships once, and then the buyer cannot cancel the order", asyn
   const cancel = await h.api("POST", `/orders/${orderId}/cancel`, { token: buyer });
   assert.equal(cancel.status, 409);
 });
+

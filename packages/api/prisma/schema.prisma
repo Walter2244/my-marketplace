@@ -102,6 +102,13 @@ model Order {
   totalCents Int
   currency   String      @default("USD")
   expiresAt  DateTime?
+  deliveryName       String?
+  deliveryPhone      String?
+  deliveryLine1      String?
+  deliveryLine2      String?
+  deliveryCity       String?
+  deliveryPostalCode String?
+  deliveryCountry    String?
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
   subOrders  SubOrder[]
@@ -170,4 +177,5 @@ model CartItem {
 
   @@unique([cartId, productId])
 }
+
 
