@@ -21,6 +21,7 @@ model Vendor {
   updatedAt DateTime  @updatedAt
   store     Store?
   products  Product[]
+  subOrders SubOrder[]
 }
 
 model Store {
@@ -85,26 +86,54 @@ model Product {
   images      ProductImage[]
 }
 
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  FULFILLED
+  CANCELLED
+  EXPIRED
+}
+
 model Order {
   id         Int         @id @default(autoincrement())
   user       User        @relation(fields: [userId], references: [id])
   userId     Int
+  status     OrderStatus @default(PENDING_PAYMENT)
   totalCents Int
   currency   String      @default("USD")
-  status     String      @default("PENDING")
+  expiresAt  DateTime?
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
+  subOrders  SubOrder[]
   items      OrderItem[]
 }
 
+model SubOrder {
+  id         Int         @id @default(autoincrement())
+  order      Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId    Int
+  vendor     Vendor      @relation(fields: [vendorId], references: [id])
+  vendorId   Int
+  status     OrderStatus @default(PENDING_PAYMENT)
+  totalCents Int
+  currency   String      @default("USD")
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  items      OrderItem[]
+
+  @@unique([orderId, vendorId])
+}
+
 model OrderItem {
-  id        Int     @id @default(autoincrement())
-  order     Order   @relation(fields: [orderId], references: [id])
-  orderId   Int
-  product   Product @relation(fields: [productId], references: [id])
-  productId Int
-  quantity  Int
-  unitCents Int
+  id         Int      @id @default(autoincrement())
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId    Int
+  subOrder   SubOrder @relation(fields: [subOrderId], references: [id], onDelete: Cascade)
+  subOrderId Int
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  Int
+  quantity   Int
+  unitCents  Int
 }
 
 model ProductImage {
@@ -141,3 +170,4 @@ model CartItem {
 
   @@unique([cartId, productId])
 }
+
