@@ -44,5 +44,17 @@ router.get("/stats", verifyAdminToken, async (req, res) => {
   }
 });
 
+// Expire unpaid orders past their 24-hour deadline and return their stock (admin only)
+router.post("/expire-orders", verifyAdminToken, async (req, res) => {
+  try {
+    const { expireOverdueOrders } = require("../lib/expireOrders");
+    const count = await expireOverdueOrders();
+    res.json({ expired: count });
+  } catch (err) {
+    console.error("Expire orders failed:", err);
+    res.status(500).json({ error: "Could not expire orders" });
+  }
+});
 module.exports = router;
+
 
