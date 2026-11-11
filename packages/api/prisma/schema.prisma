@@ -112,10 +112,15 @@ model Order {
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
   subOrders  SubOrder[]
+  payments   Payment[]
   items      OrderItem[]
 }
 
 model SubOrder {
+  commissionCents   Int           @default(0)
+  vendorShareCents Int           @default(0)
+  payoutStatus     PayoutStatus @default(UNPAID)
+  payoutReference  String?
   id         Int         @id @default(autoincrement())
   order      Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId    Int
@@ -179,3 +184,39 @@ model CartItem {
 }
 
 
+
+enum PaymentProvider {
+  TEST
+  PAYNOW
+  ECOCASH
+  STRIPE
+  PAYPAL
+  CRYPTO
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  NEEDS_REFUND
+}
+
+enum PayoutStatus {
+  UNPAID
+  PAID_OUT
+}
+
+model Payment {
+  id                Int             @id @default(autoincrement())
+  order             Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId           Int
+  provider          PaymentProvider
+  providerReference String          @unique
+  status            PaymentStatus   @default(PENDING)
+  amountCents       Int
+  currency          String
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([orderId])
+}
