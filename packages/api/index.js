@@ -16,6 +16,7 @@ const buyerRoutes = require("./routes/buyer");
 const cartRoutes = require("./routes/cart");
 const orderRoutes = require("./routes/orders");
 const vendorOrderRoutes = require("./routes/vendorOrders");
+const paymentRoutes = require("./routes/payments");
 
 // Initialize Express app
 const app = express();
@@ -36,7 +37,7 @@ app.use(cors({
 }));
 
 // Parse JSON bodies
-app.use(express.json());
+app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf; } }));
 
 // Request logger (useful during rollout)
 app.use((req, res, next) => {
@@ -62,6 +63,7 @@ app.use("/buyers", buyerRoutes);
 app.use("/cart", cartRoutes);
 app.use("/orders", orderRoutes);
 app.use("/vendor-orders", vendorOrderRoutes);
+app.use("/payments", paymentRoutes);
 
 // Robust route printer for startup debugging
 function printRegisteredRoutes() {
@@ -122,6 +124,7 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 module.exports = app;
+
 
 
 
