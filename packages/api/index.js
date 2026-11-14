@@ -23,6 +23,7 @@ const collectionRoutes = require("./routes/collection");
 const livestockRecordRoutes = require("./routes/livestockRecords");
 const deliveryOptionRoutes = require("./routes/deliveryOptions");
 const districtRoutes = require("./routes/districts");
+const reviewDisputeRoutes = require("./routes/reviewsDisputes");
 
 // Initialize Express app
 const app = express();
@@ -76,6 +77,7 @@ app.use("/collection", collectionRoutes);
 app.use("/livestock", livestockRecordRoutes);
 app.use("/products", deliveryOptionRoutes);
 app.use("/districts", districtRoutes);
+app.use("/reviews", reviewDisputeRoutes);
 
 // Robust route printer for startup debugging
 function printRegisteredRoutes() {
@@ -136,6 +138,7 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 module.exports = app;
+
 
 
 

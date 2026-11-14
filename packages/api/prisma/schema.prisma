@@ -128,6 +128,8 @@ model Order {
 }
 
 model SubOrder {
+  review   Review?
+  dispute  Dispute?
   deliveryMethod    DeliveryMethod @default(NONE)
   deliveryFeeCents   Int            @default(0)
   deliveryQuoteRef   String?
@@ -366,4 +368,33 @@ model District {
   createdAt DateTime @default(now())
 
   @@unique([province, name])
+}
+
+enum DisputeStatus {
+  OPEN
+  RESOLVED_FOR_BUYER
+  RESOLVED_FOR_VENDOR
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  subOrder   SubOrder @relation(fields: [subOrderId], references: [id], onDelete: Cascade)
+  subOrderId Int      @unique
+  reviewerId Int
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+}
+
+model Dispute {
+  id             Int           @id @default(autoincrement())
+  subOrder       SubOrder      @relation(fields: [subOrderId], references: [id], onDelete: Cascade)
+  subOrderId     Int           @unique
+  openedById     Int
+  reason         String
+  status         DisputeStatus @default(OPEN)
+  decisionNote   String?
+  decidedById    Int?
+  decidedAt      DateTime?
+  createdAt      DateTime      @default(now())
 }
