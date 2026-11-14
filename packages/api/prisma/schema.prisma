@@ -70,6 +70,7 @@ model User {
 }
 
 model Product {
+  collectable  Boolean @default(false)
   unitOfSale   UnitOfSale @default(EACH)
   id          Int           @id @default(autoincrement())
   vendor      Vendor        @relation(fields: [vendorId], references: [id])
@@ -120,6 +121,10 @@ model Order {
 }
 
 model SubOrder {
+  fulfilment     Fulfilment @default(DELIVERY)
+  readyAt         DateTime?
+  collectionCode  String?
+  collectionPreferredTime String?
   commissionCents   Int           @default(0)
   vendorShareCents Int           @default(0)
   payoutStatus     PayoutStatus @default(UNPAID)
@@ -273,3 +278,10 @@ model VerificationApplication {
 
   @@index([vendorId])
 }
+
+enum Fulfilment {
+  DELIVERY
+  COLLECTION
+}
+
+
