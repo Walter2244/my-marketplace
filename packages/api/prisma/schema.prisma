@@ -70,6 +70,8 @@ model User {
 }
 
 model Product {
+  province   String?
+  district   String?
   deliveryOptions   DeliveryOption[]
   identification  AnimalIdentification?
   healthRecords   HealthRecord[]
@@ -355,4 +357,13 @@ model DeliveryOption {
   createdAt   DateTime           @default(now())
 
   @@unique([productId, kind])
+}
+
+model District {
+  id        Int      @id @default(autoincrement())
+  name      String
+  province  String
+  createdAt DateTime @default(now())
+
+  @@unique([province, name])
 }
