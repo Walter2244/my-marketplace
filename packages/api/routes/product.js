@@ -80,7 +80,7 @@ router.post("/", verifyVendorToken, async (req, res) => {
         currency: currency || "USD",
         quantity: quantity ?? 0,
         status: productStatus,
-        categoryId: finalCategory, unitOfSale,
+        categoryId: finalCategory, unitOfSale, collectable: req.body.collectable === true,
       },
       include: productInclude,
     });
@@ -222,6 +222,9 @@ router.patch("/:id", verifyVendorToken, async (req, res) => {
       const verifyProblem = await checkLivestockVerification(prisma, req.vendor.id, data.categoryId);
       if (verifyProblem) return res.status(403).json({ error: verifyProblem });
     }
+    if (req.body.collectable !== undefined) {
+      data.collectable = req.body.collectable === true;
+    }
     if (req.body.unitOfSale !== undefined) {
       const unitProblem = await checkUnit(prisma, req.body.unitOfSale, data.categoryId !== undefined ? data.categoryId : existing.categoryId);
       if (unitProblem) return res.status(400).json({ error: unitProblem });
@@ -278,6 +281,7 @@ router.delete("/:id", verifyVendorToken, async (req, res) => {
 });
 
 module.exports = router;
+
 
 
 
