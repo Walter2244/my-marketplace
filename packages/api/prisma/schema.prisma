@@ -13,6 +13,7 @@ enum ProductStatus {
 }
 
 model Vendor {
+  agentLinks AgentLink[]
   verified      Boolean                 @default(false)
   verifications VerificationApplication[]
   id        Int       @id @default(autoincrement())
@@ -128,6 +129,7 @@ model Order {
 }
 
 model SubOrder {
+  agentCommission AgentCommission?
   review   Review?
   dispute  Dispute?
   deliveryMethod    DeliveryMethod @default(NONE)
@@ -397,4 +399,44 @@ model Dispute {
   decidedById    Int?
   decidedAt      DateTime?
   createdAt      DateTime      @default(now())
+}
+
+enum AgentStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+model Agent {
+  id        Int          @id @default(autoincrement())
+  name      String
+  phone     String       @unique
+  status    AgentStatus  @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  links     AgentLink[]
+  commissions AgentCommission[]
+}
+
+model AgentLink {
+  id        Int       @id @default(autoincrement())
+  agent     Agent     @relation(fields: [agentId], references: [id])
+  agentId   Int
+  vendor    Vendor    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  vendorId  Int
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+  endedBy   String?
+
+  @@index([vendorId])
+}
+
+model AgentCommission {
+  id          Int      @id @default(autoincrement())
+  agent       Agent    @relation(fields: [agentId], references: [id])
+  agentId     Int
+  subOrder    SubOrder @relation(fields: [subOrderId], references: [id], onDelete: Cascade)
+  subOrderId  Int      @unique
+  saleCents   Int
+  commissionCents Int
+  paidOut     Boolean  @default(false)
+  createdAt   DateTime @default(now())
 }
