@@ -48,7 +48,7 @@ after(async () => {
 test("per-head pricing is accepted under Livestock", async () => {
   const res = await h.api("POST", "/products", {
     token: vendor.token,
-    body: { title: "Goat, ewe", priceCents: 45000, quantity: 3, unitOfSale: "PER_HEAD", categoryId: goats.id, status: "PUBLISHED" },
+    body: { title: "Goat, ewe", priceCents: 45000, quantity: 3, unitOfSale: "PER_HEAD", categoryId: goats.id, attributes: { breed: "Boer", sex: "female", ageMonths: 18 }, status: "PUBLISHED" },
   });
   assert.equal(res.status, 201);
   assert.equal(res.data.unitOfSale, "PER_HEAD");
@@ -106,4 +106,5 @@ test("changing a listing to per-head outside Livestock is refused", async () => 
   });
   assert.equal(res.status, 400);
 });
+
 

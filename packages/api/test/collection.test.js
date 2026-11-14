@@ -41,7 +41,7 @@ before(async () => {
 
   const c = await h.api("POST", "/products", {
     token: vendor.token,
-    body: { title: "Ewe, collectable", priceCents: 45000, quantity: 50, unitOfSale: "PER_HEAD", categoryId: goats.id, status: "PUBLISHED", collectable: true },
+    body: { title: "Ewe, collectable", priceCents: 45000, quantity: 50, unitOfSale: "PER_HEAD", categoryId: goats.id, attributes: { breed: "Boer", sex: "female", ageMonths: 18 }, status: "PUBLISHED", collectable: true },
   });
   collectable = c.data;
   const p = await h.api("POST", "/products", {
@@ -146,4 +146,5 @@ test("handover cannot be done twice", async () => {
   const again = await h.api("POST", `/collection/sub-orders/${sub}/handover`, { token: vendor.token, body: { code: ready.data.collectionCode } });
   assert.equal(again.status, 409);
 });
+
 
