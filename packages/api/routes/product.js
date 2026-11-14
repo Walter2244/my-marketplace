@@ -3,6 +3,7 @@ const { PrismaClient } = require("@prisma/client");
 const { verifyVendorToken } = require("../middleware/auth");
 const { withStock, publicStock } = require("../lib/stock");
 const { checkUnit, checkLivestockVerification } = require("../lib/unitRules");
+const { ruleSetFor, checkAttributes } = require("../lib/attributes");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -10,6 +11,7 @@ const prisma = new PrismaClient();
 const STATUSES = ["DRAFT", "PUBLISHED"];
 
 const productInclude = {
+  attributes: { select: { name: true, value: true } },
   vendor: { select: { id: true, name: true } },
   category: { select: { id: true, name: true, slug: true, level: true } },
 };
@@ -62,9 +64,15 @@ router.post("/", verifyVendorToken, async (req, res) => {
       finalCategory = categoryId;
     }
 
+
+
+
     const unitProblem = await checkUnit(prisma, unitOfSale, finalCategory);
     const verifyProblem = await checkLivestockVerification(prisma, req.vendor.id, finalCategory);
     if (verifyProblem) return res.status(403).json({ error: verifyProblem });
+    const ruleSet = finalCategory ? await ruleSetFor(prisma, finalCategory) : null;
+    const attrProblem = checkAttributes(ruleSet, req.body.attributes);
+    if (attrProblem) return res.status(400).json({ error: attrProblem });
     if (unitProblem) return res.status(400).json({ error: unitProblem });
     if (productStatus === "PUBLISHED" && finalCategory === null) {
       return res.status(400).json({ error: "a product needs a category before it can be published" });
@@ -81,6 +89,7 @@ router.post("/", verifyVendorToken, async (req, res) => {
         quantity: quantity ?? 0,
         status: productStatus,
         categoryId: finalCategory, unitOfSale, collectable: req.body.collectable === true,
+        attributes: { create: Object.entries(req.body.attributes || {}).map(([name, value]) => ({ name, value: String(value) })) },
       },
       include: productInclude,
     });
@@ -221,9 +230,19 @@ router.patch("/:id", verifyVendorToken, async (req, res) => {
     if (data.categoryId !== undefined) {
       const verifyProblem = await checkLivestockVerification(prisma, req.vendor.id, data.categoryId);
       if (verifyProblem) return res.status(403).json({ error: verifyProblem });
+    const ruleSet = finalCategory ? await ruleSetFor(prisma, finalCategory) : null;
+    const attrProblem = checkAttributes(ruleSet, req.body.attributes);
+    if (attrProblem) return res.status(400).json({ error: attrProblem });
     }
     if (req.body.collectable !== undefined) {
       data.collectable = req.body.collectable === true;
+    }
+    if (req.body.attributes !== undefined) {
+      const catId = data.categoryId !== undefined ? data.categoryId : existing.categoryId;
+      const rs = catId ? await ruleSetFor(prisma, catId) : null;
+      const aProblem = checkAttributes(rs, req.body.attributes);
+      if (aProblem) return res.status(400).json({ error: aProblem });
+      data.attributes = { deleteMany: {}, create: Object.entries(req.body.attributes).map(([name, value]) => ({ name, value: String(value) })) };
     }
     if (req.body.unitOfSale !== undefined) {
       const unitProblem = await checkUnit(prisma, req.body.unitOfSale, data.categoryId !== undefined ? data.categoryId : existing.categoryId);
@@ -281,6 +300,8 @@ router.delete("/:id", verifyVendorToken, async (req, res) => {
 });
 
 module.exports = router;
+
+
 
 
 

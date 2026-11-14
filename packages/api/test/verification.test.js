@@ -37,7 +37,7 @@ const idNumber = "63-123456A63";
 test("an unverified vendor cannot list livestock", async () => {
   const res = await h.api("POST", "/products", {
     token: vendor.token,
-    body: { title: "Goat", priceCents: 45000, quantity: 2, unitOfSale: "PER_HEAD", categoryId: goats.id, status: "PUBLISHED" },
+    body: { title: "Goat", priceCents: 45000, quantity: 2, unitOfSale: "PER_HEAD", categoryId: goats.id, attributes: { breed: "Boer", sex: "female", ageMonths: 18 }, status: "PUBLISHED" },
   });
   assert.equal(res.status, 403);
 });
@@ -154,7 +154,7 @@ test("an approval sets the vendor as verified, and livestock listings are then a
 
   const listing = await h.api("POST", "/products", {
     token: vendor.token,
-    body: { title: "Goat, ewe", priceCents: 45000, quantity: 2, unitOfSale: "PER_HEAD", categoryId: goats.id, status: "PUBLISHED" },
+    body: { title: "Goat, ewe", priceCents: 45000, quantity: 2, unitOfSale: "PER_HEAD", categoryId: goats.id, attributes: { breed: "Boer", sex: "female", ageMonths: 18 }, status: "PUBLISHED" },
   });
   assert.equal(listing.status, 201);
 });
@@ -181,7 +181,8 @@ test("only an admin can make a decision", async () => {
 test("a vendor who is not verified still cannot move a produce listing into livestock", async () => {
   const notYet = await h.api("POST", "/products", {
     token: other.token,
-    body: { title: "Other goat", priceCents: 45000, quantity: 1, unitOfSale: "PER_HEAD", categoryId: goats.id },
+    body: { title: "Other goat", priceCents: 45000, quantity: 1, unitOfSale: "PER_HEAD", categoryId: goats.id, attributes: { breed: "Boer", sex: "female", ageMonths: 18 } },
   });
   assert.equal(notYet.status, 403);
 });
+

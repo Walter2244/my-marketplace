@@ -70,6 +70,7 @@ model User {
 }
 
 model Product {
+  attributes  ProductAttribute[]
   collectable  Boolean @default(false)
   unitOfSale   UnitOfSale @default(EACH)
   id          Int           @id @default(autoincrement())
@@ -285,3 +286,13 @@ enum Fulfilment {
 }
 
 
+
+model ProductAttribute {
+  id        Int     @id @default(autoincrement())
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  name      String
+  value     String
+
+  @@unique([productId, name])
+}
