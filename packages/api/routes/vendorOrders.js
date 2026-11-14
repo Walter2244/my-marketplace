@@ -23,7 +23,7 @@ const subOrderSelect = {
     select: {
       productId: true,
       quantity: true,
-      unitCents: true,
+      unitCents: true, unitOfSale: true,
       product: { select: { title: true } },
     },
   },
@@ -89,3 +89,4 @@ router.post("/:id/ship", verifyVendorToken, async (req, res) => {
 });
 
 module.exports = router;
+

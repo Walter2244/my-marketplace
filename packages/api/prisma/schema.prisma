@@ -68,6 +68,7 @@ model User {
 }
 
 model Product {
+  unitOfSale   UnitOfSale @default(EACH)
   id          Int           @id @default(autoincrement())
   vendor      Vendor        @relation(fields: [vendorId], references: [id])
   vendorId    Int
@@ -137,6 +138,7 @@ model SubOrder {
 }
 
 model OrderItem {
+  unitOfSale UnitOfSale @default(EACH)
   id         Int      @id @default(autoincrement())
   order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId    Int
@@ -220,3 +222,11 @@ model Payment {
 
   @@index([orderId])
 }
+
+enum UnitOfSale {
+  EACH
+  PER_HEAD
+  PER_KG
+  PER_CRATE
+}
+
