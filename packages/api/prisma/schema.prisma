@@ -70,6 +70,7 @@ model User {
 }
 
 model Product {
+  deliveryOptions   DeliveryOption[]
   identification  AnimalIdentification?
   healthRecords   HealthRecord[]
   healthDeclaration HealthDeclaration?
@@ -125,6 +126,9 @@ model Order {
 }
 
 model SubOrder {
+  deliveryMethod    DeliveryMethod @default(NONE)
+  deliveryFeeCents   Int            @default(0)
+  deliveryQuoteRef   String?
   fulfilment     Fulfilment @default(DELIVERY)
   readyAt         DateTime?
   collectionCode  String?
@@ -326,4 +330,29 @@ model HealthDeclaration {
   productId   Int      @unique
   statement   String
   declaredAt  DateTime @default(now())
+}
+
+enum DeliveryOptionKind {
+  COLLECTION
+  FLAT_FEE
+  QUOTE
+}
+
+enum DeliveryMethod {
+  NONE
+  COLLECTION
+  FLAT_FEE
+  QUOTE
+}
+
+model DeliveryOption {
+  id          Int                @id @default(autoincrement())
+  product     Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId   Int
+  kind        DeliveryOptionKind
+  feeCents    Int                @default(0)
+  note        String?
+  createdAt   DateTime           @default(now())
+
+  @@unique([productId, kind])
 }
