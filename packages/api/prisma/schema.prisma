@@ -70,6 +70,9 @@ model User {
 }
 
 model Product {
+  identification  AnimalIdentification?
+  healthRecords   HealthRecord[]
+  healthDeclaration HealthDeclaration?
   attributes  ProductAttribute[]
   collectable  Boolean @default(false)
   unitOfSale   UnitOfSale @default(EACH)
@@ -295,4 +298,32 @@ model ProductAttribute {
   value     String
 
   @@unique([productId, name])
+}
+
+model AnimalIdentification {
+  id         Int      @id @default(autoincrement())
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId  Int      @unique
+  tagNumber  String   @unique
+  createdAt  DateTime @default(now())
+}
+
+model HealthRecord {
+  id          Int      @id @default(autoincrement())
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId   Int
+  kind        String
+  description String
+  recordedOn  DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([productId])
+}
+
+model HealthDeclaration {
+  id          Int      @id @default(autoincrement())
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId   Int      @unique
+  statement   String
+  declaredAt  DateTime @default(now())
 }
