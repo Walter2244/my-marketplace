@@ -28,7 +28,7 @@ async function loadCart(userId) {
               title: true,
               status: true,
               priceCents: true,
-              currency: true,
+              currency: true, unitOfSale: true,
               quantity: true,
               vendor: { select: { id: true, name: true } },
             },
@@ -175,3 +175,4 @@ router.delete("/items/:itemId", verifyBuyerToken, async (req, res) => {
 });
 
 module.exports = router;
+

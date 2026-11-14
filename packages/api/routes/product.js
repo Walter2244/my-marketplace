@@ -2,6 +2,7 @@ const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const { verifyVendorToken } = require("../middleware/auth");
 const { withStock, publicStock } = require("../lib/stock");
+const { checkUnit } = require("../lib/unitRules");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -50,6 +51,7 @@ router.post("/", verifyVendorToken, async (req, res) => {
       return res.status(400).json({ error: "status must be DRAFT or PUBLISHED" });
     }
 
+    const unitOfSale = req.body.unitOfSale ?? "EACH";
     let finalCategory = null;
     if (categoryId !== undefined && categoryId !== null) {
       if (!Number.isInteger(categoryId)) {
@@ -60,6 +62,8 @@ router.post("/", verifyVendorToken, async (req, res) => {
       finalCategory = categoryId;
     }
 
+    const unitProblem = await checkUnit(prisma, unitOfSale, finalCategory);
+    if (unitProblem) return res.status(400).json({ error: unitProblem });
     if (productStatus === "PUBLISHED" && finalCategory === null) {
       return res.status(400).json({ error: "a product needs a category before it can be published" });
     }
@@ -74,7 +78,7 @@ router.post("/", verifyVendorToken, async (req, res) => {
         currency: currency || "USD",
         quantity: quantity ?? 0,
         status: productStatus,
-        categoryId: finalCategory,
+        categoryId: finalCategory, unitOfSale,
       },
       include: productInclude,
     });
@@ -212,6 +216,11 @@ router.patch("/:id", verifyVendorToken, async (req, res) => {
         data.categoryId = categoryId;
       }
     }
+    if (req.body.unitOfSale !== undefined) {
+      const unitProblem = await checkUnit(prisma, req.body.unitOfSale, data.categoryId !== undefined ? data.categoryId : existing.categoryId);
+      if (unitProblem) return res.status(400).json({ error: unitProblem });
+      data.unitOfSale = req.body.unitOfSale;
+    }
     if (status !== undefined) {
       if (!STATUSES.includes(status)) {
         return res.status(400).json({ error: "status must be DRAFT or PUBLISHED" });
@@ -263,4 +272,5 @@ router.delete("/:id", verifyVendorToken, async (req, res) => {
 });
 
 module.exports = router;
+
 

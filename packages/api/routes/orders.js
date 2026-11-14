@@ -38,7 +38,7 @@ function orderView(order) {
         productId: i.productId,
         title: i.product ? i.product.title : null,
         quantity: i.quantity,
-        unitCents: i.unitCents,
+        unitCents: i.unitCents, unitOfSale: i.unitOfSale,
       })),
     })),
   };
@@ -141,7 +141,7 @@ router.post("/checkout", verifyBuyerToken, async (req, res) => {
                 orderId: created.id,
                 productId: i.productId,
                 quantity: i.quantity,
-                unitCents: i.product.priceCents,
+                unitCents: i.product.priceCents, unitOfSale: i.product.unitOfSale,
               })),
             },
           },
@@ -227,6 +227,7 @@ router.post("/:id/cancel", verifyBuyerToken, async (req, res) => {
   }
 });
 module.exports = router;
+
 
 
 
