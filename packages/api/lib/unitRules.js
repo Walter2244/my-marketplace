@@ -25,4 +25,18 @@ async function checkUnit(prisma, unit, categoryId) {
   return null;
 }
 
-module.exports = { UNITS, checkUnit, isLivestockCategory };
+// A livestock listing needs a verified vendor. Returns an error message, or null if the vendor may list it.
+async function checkLivestockVerification(prisma, vendorId, categoryId) {
+  if (categoryId === null || categoryId === undefined) return null;
+  const livestock = await isLivestockCategory(prisma, categoryId);
+  if (!livestock) return null;
+  const vendor = await prisma.vendor.findUnique({ where: { id: vendorId } });
+  if (!vendor || !vendor.verified) {
+    return "only verified vendors can list livestock; apply for verification first";
+  }
+  return null;
+}
+
+module.exports = { UNITS, checkUnit, isLivestockCategory, checkLivestockVerification };
+
+

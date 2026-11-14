@@ -18,6 +18,7 @@ const orderRoutes = require("./routes/orders");
 const vendorOrderRoutes = require("./routes/vendorOrders");
 const paymentRoutes = require("./routes/payments");
 const payoutRoutes = require("./routes/payouts");
+const verificationRoutes = require("./routes/verification");
 
 // Initialize Express app
 const app = express();
@@ -66,6 +67,7 @@ app.use("/orders", orderRoutes);
 app.use("/vendor-orders", vendorOrderRoutes);
 app.use("/payments", paymentRoutes);
 app.use("/payouts", payoutRoutes);
+app.use("/verification", verificationRoutes);
 
 // Robust route printer for startup debugging
 function printRegisteredRoutes() {
@@ -126,6 +128,7 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 module.exports = app;
+
 
 
 

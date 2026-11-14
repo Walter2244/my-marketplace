@@ -13,6 +13,8 @@ enum ProductStatus {
 }
 
 model Vendor {
+  verified      Boolean                 @default(false)
+  verifications VerificationApplication[]
   id        Int       @id @default(autoincrement())
   name      String
   email     String    @unique
@@ -230,3 +232,44 @@ enum UnitOfSale {
   PER_CRATE
 }
 
+
+enum DocumentType {
+  FARM_OWNERSHIP
+  OFFER_LETTER
+  PERMIT
+  LEASE_AGREEMENT
+  AFFIDAVIT
+  DEALER_LICENCE
+}
+
+enum ApplicationStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+}
+
+model VerificationApplication {
+  id                    Int               @id @default(autoincrement())
+  vendor                Vendor            @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  vendorId              Int
+  status                ApplicationStatus @default(PENDING_REVIEW)
+  idNumber              String
+  idCheckStatus         String            @default("NOT_RUN")
+  holderName            String
+  relationshipNote      String?
+  documentType          DocumentType
+  documentRef           String
+  affidavitCommissioned Boolean           @default(false)
+  licenceNumber         String?
+  farmName              String?
+  province              String?
+  district              String?
+  saleLocation          String?
+  reviewerNote          String?
+  reviewedBy            Int?
+  reviewedAt            DateTime?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  @@index([vendorId])
+}
