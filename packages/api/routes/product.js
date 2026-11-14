@@ -4,6 +4,7 @@ const { verifyVendorToken } = require("../middleware/auth");
 const { withStock, publicStock } = require("../lib/stock");
 const { checkUnit, checkLivestockVerification } = require("../lib/unitRules");
 const { ruleSetFor, checkAttributes } = require("../lib/attributes");
+const { checkLocation } = require("../lib/locations");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -70,6 +71,8 @@ router.post("/", verifyVendorToken, async (req, res) => {
     const unitProblem = await checkUnit(prisma, unitOfSale, finalCategory);
     const verifyProblem = await checkLivestockVerification(prisma, req.vendor.id, finalCategory);
     if (verifyProblem) return res.status(403).json({ error: verifyProblem });
+    const locProblem = await checkLocation(prisma, req.body.province, req.body.district);
+    if (locProblem) return res.status(400).json({ error: locProblem });
     const ruleSet = finalCategory ? await ruleSetFor(prisma, finalCategory) : null;
     const attrProblem = checkAttributes(ruleSet, req.body.attributes);
     if (attrProblem) return res.status(400).json({ error: attrProblem });
@@ -88,7 +91,7 @@ router.post("/", verifyVendorToken, async (req, res) => {
         currency: currency || "USD",
         quantity: quantity ?? 0,
         status: productStatus,
-        categoryId: finalCategory, unitOfSale, collectable: req.body.collectable === true,
+        categoryId: finalCategory, unitOfSale, collectable: req.body.collectable === true, province: req.body.province ?? null, district: req.body.district ?? null,
         attributes: { create: Object.entries(req.body.attributes || {}).map(([name, value]) => ({ name, value: String(value) })) },
       },
       include: productInclude,
@@ -230,6 +233,10 @@ router.patch("/:id", verifyVendorToken, async (req, res) => {
     if (data.categoryId !== undefined) {
       const verifyProblem = await checkLivestockVerification(prisma, req.vendor.id, data.categoryId);
       if (verifyProblem) return res.status(403).json({ error: verifyProblem });
+    const locProblem = await checkLocation(prisma, req.body.province, req.body.district);
+    if (locProblem) return res.status(400).json({ error: locProblem });
+    if (req.body.province !== undefined) data.province = req.body.province;
+    if (req.body.district !== undefined) data.district = req.body.district;
     const ruleSet = finalCategory ? await ruleSetFor(prisma, finalCategory) : null;
     const attrProblem = checkAttributes(ruleSet, req.body.attributes);
     if (attrProblem) return res.status(400).json({ error: attrProblem });
@@ -300,6 +307,8 @@ router.delete("/:id", verifyVendorToken, async (req, res) => {
 });
 
 module.exports = router;
+
+
 
 
 
