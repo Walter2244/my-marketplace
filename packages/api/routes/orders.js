@@ -69,9 +69,12 @@ router.post("/checkout", verifyBuyerToken, async (req, res) => {
     if (!optionalLength(address.line2, 200) || address.name.length > 120 || address.phone.length > 30) {
       return res.status(400).json({ error: "delivery address has a field that is too long" });
     }
+
+    const choices = (req.body && req.body.deliveryChoices) || {};
+
     const cart = await prisma.cart.findUnique({
       where: { userId: req.user.id },
-      include: { items: { include: { product: true } } },
+      include: { items: { include: { product: { include: { deliveryOptions: true } } } } },
     });
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ error: "your cart is empty" });
@@ -99,9 +102,35 @@ router.post("/checkout", verifyBuyerToken, async (req, res) => {
       byVendor.get(vendorId).push(item);
     }
 
-    const totalCents = cart.items.reduce((sum, i) => sum + i.product.priceCents * i.quantity, 0);
+    // Each vendor's delivery choice must be one that every product in their part of the basket offers
+    const deliveryFor = new Map();
+    for (const [vendorId, items] of byVendor.entries()) {
+      const picked = choices[String(vendorId)];
+      const offeredEverywhere = (kind) => items.every((i) => i.product.deliveryOptions.some((o) => o.kind === kind));
+      if (!picked || !picked.method || picked.method === "NONE") {
+        const offered = items[0].product.deliveryOptions.map((o) => o.kind);
+        if (offered.length > 0) {
+          return res.status(400).json({ error: `choose a delivery method for vendor ${vendorId}`, offered });
+        }
+        deliveryFor.set(vendorId, { method: "NONE", feeCents: 0, quoteRef: null });
+        continue;
+      }
+      if (!offeredEverywhere(picked.method)) {
+        return res.status(400).json({ error: `vendor ${vendorId} does not offer ${picked.method} for every item in the basket` });
+      }
+      const feeCents = picked.method === "FLAT_FEE"
+        ? items.reduce((max, i) => Math.max(max, i.product.deliveryOptions.find((o) => o.kind === "FLAT_FEE").feeCents), 0)
+        : 0;
+      deliveryFor.set(vendorId, { method: picked.method, feeCents, quoteRef: picked.method === "QUOTE" ? (typeof picked.quoteRef === "string" ? picked.quoteRef.trim() : null) : null });
+    }
+
+    const subTotals = [...byVendor.entries()].map(([vendorId, items]) => {
+      const goods = items.reduce((sum, i) => sum + i.product.priceCents * i.quantity, 0);
+      return { vendorId, goods, delivery: deliveryFor.get(vendorId) };
+    });
+    const totalCents = subTotals.reduce((sum, s) => sum + s.goods + s.delivery.feeCents, 0);
+
     const order = await prisma.$transaction(async (tx) => {
-      // Reduce stock only where enough remains, so two buyers can't both take the last item
       for (const item of cart.items) {
         const updated = await tx.product.updateMany({
           where: { id: item.productId, quantity: { gte: item.quantity }, status: "PUBLISHED" },
@@ -110,7 +139,6 @@ router.post("/checkout", verifyBuyerToken, async (req, res) => {
         if (updated.count === 0) throw new Error(`stock changed for product ${item.productId}`);
       }
 
-      // The order is created first, so every sub-order and item can use its real id
       const created = await tx.order.create({
         data: {
           userId: req.user.id,
@@ -128,20 +156,24 @@ router.post("/checkout", verifyBuyerToken, async (req, res) => {
         },
       });
 
-      for (const [vendorId, items] of byVendor.entries()) {
+      for (const s of subTotals) {
         await tx.subOrder.create({
           data: {
             orderId: created.id,
-            vendorId,
+            vendorId: s.vendorId,
             status: "PENDING_PAYMENT",
             currency,
-            totalCents: items.reduce((sum, i) => sum + i.product.priceCents * i.quantity, 0),
+            totalCents: s.goods + s.delivery.feeCents,
+            deliveryMethod: s.delivery.method,
+            deliveryFeeCents: s.delivery.feeCents,
+            deliveryQuoteRef: s.delivery.quoteRef,
             items: {
-              create: items.map((i) => ({
+              create: byVendor.get(s.vendorId).map((i) => ({
                 orderId: created.id,
                 productId: i.productId,
                 quantity: i.quantity,
-                unitCents: i.product.priceCents, unitOfSale: i.product.unitOfSale,
+                unitCents: i.product.priceCents,
+                unitOfSale: i.product.unitOfSale,
               })),
             },
           },
@@ -151,6 +183,7 @@ router.post("/checkout", verifyBuyerToken, async (req, res) => {
       await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
       return tx.order.findUnique({ where: { id: created.id }, include: orderInclude });
     });
+
     res.status(201).json(orderView(order));
   } catch (err) {
     if (err.message && err.message.startsWith("stock changed")) {
@@ -160,7 +193,6 @@ router.post("/checkout", verifyBuyerToken, async (req, res) => {
     res.status(500).json({ error: "Could not place order" });
   }
 });
-
 // The buyer's own orders, newest first
 router.get("/", verifyBuyerToken, async (req, res) => {
   try {
@@ -227,6 +259,9 @@ router.post("/:id/cancel", verifyBuyerToken, async (req, res) => {
   }
 });
 module.exports = router;
+
+
+
 
 
 
