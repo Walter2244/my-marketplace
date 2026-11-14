@@ -52,6 +52,7 @@ async function resetDatabase() {
   await prisma.vendor.deleteMany();
   await prisma.user.deleteMany();
   await prisma.admin.deleteMany();
+  await prisma.district.deleteMany();
 }
 
 async function createAdmin(email, password) {
@@ -73,5 +74,6 @@ async function api(method, route, { token, body } = {}) {
 }
 
 module.exports = { BASE, prisma, startServer, stopServer, resetDatabase, createAdmin, api };
+
 
 

@@ -58,6 +58,8 @@ router.get("/", async (req, res) => {
     if (minPrice !== null) add(`p."priceCents" >= ?`, minPrice);
     if (maxPrice !== null) add(`p."priceCents" <= ?`, maxPrice);
     if (req.query.inStock === "true") conditions.push(`p."quantity" > 0`);
+    if (req.query.province) add(`p."province" = ?`, String(req.query.province));
+    if (req.query.district) add(`p."district" = ?`, String(req.query.district));
 
     let order = SORTS[sort];
     if (sort === "relevance") {
@@ -94,3 +96,4 @@ router.get("/", async (req, res) => {
 });
 
 module.exports = router;
+
