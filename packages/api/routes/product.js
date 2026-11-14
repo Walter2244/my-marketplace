@@ -2,7 +2,7 @@ const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const { verifyVendorToken } = require("../middleware/auth");
 const { withStock, publicStock } = require("../lib/stock");
-const { checkUnit } = require("../lib/unitRules");
+const { checkUnit, checkLivestockVerification } = require("../lib/unitRules");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -63,6 +63,8 @@ router.post("/", verifyVendorToken, async (req, res) => {
     }
 
     const unitProblem = await checkUnit(prisma, unitOfSale, finalCategory);
+    const verifyProblem = await checkLivestockVerification(prisma, req.vendor.id, finalCategory);
+    if (verifyProblem) return res.status(403).json({ error: verifyProblem });
     if (unitProblem) return res.status(400).json({ error: unitProblem });
     if (productStatus === "PUBLISHED" && finalCategory === null) {
       return res.status(400).json({ error: "a product needs a category before it can be published" });
@@ -216,6 +218,10 @@ router.patch("/:id", verifyVendorToken, async (req, res) => {
         data.categoryId = categoryId;
       }
     }
+    if (data.categoryId !== undefined) {
+      const verifyProblem = await checkLivestockVerification(prisma, req.vendor.id, data.categoryId);
+      if (verifyProblem) return res.status(403).json({ error: verifyProblem });
+    }
     if (req.body.unitOfSale !== undefined) {
       const unitProblem = await checkUnit(prisma, req.body.unitOfSale, data.categoryId !== undefined ? data.categoryId : existing.categoryId);
       if (unitProblem) return res.status(400).json({ error: unitProblem });
@@ -272,5 +278,6 @@ router.delete("/:id", verifyVendorToken, async (req, res) => {
 });
 
 module.exports = router;
+
 
 

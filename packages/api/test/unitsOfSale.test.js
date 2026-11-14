@@ -22,6 +22,7 @@ before(async () => {
   await h.startServer();
   await h.resetDatabase();
   vendor = await createVendor("Unit Vendor", "unit.vendor@example.com", "Unit-Vendor-2026!");
+  await h.prisma.vendor.update({ where: { id: vendor.id }, data: { verified: true } });
   await h.api("POST", "/stores", { token: vendor.token, body: { name: "Unit Shop", city: "Harare" } });
 
   const admin = await h.prisma.admin.create({
@@ -105,3 +106,4 @@ test("changing a listing to per-head outside Livestock is refused", async () => 
   });
   assert.equal(res.status, 400);
 });
+
