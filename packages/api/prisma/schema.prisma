@@ -13,6 +13,8 @@ enum ProductStatus {
 }
 
 model Vendor {
+  groupLed    ProducerGroup?
+  groupMemberships GroupMember[]
   agentLinks AgentLink[]
   verified      Boolean                 @default(false)
   verifications VerificationApplication[]
@@ -129,6 +131,7 @@ model Order {
 }
 
 model SubOrder {
+  groupShares  GroupShare[]
   agentCommission AgentCommission?
   review   Review?
   dispute  Dispute?
@@ -439,4 +442,38 @@ model AgentCommission {
   commissionCents Int
   paidOut     Boolean  @default(false)
   createdAt   DateTime @default(now())
+}
+
+model ProducerGroup {
+  id        Int           @id @default(autoincrement())
+  name      String
+  lead      Vendor        @relation(fields: [leadId], references: [id])
+  leadId    Int           @unique
+  listed    Boolean       @default(false)
+  createdAt DateTime      @default(now())
+  members   GroupMember[]
+}
+
+model GroupMember {
+  id           Int           @id @default(autoincrement())
+  group        ProducerGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId      Int
+  vendor       Vendor        @relation(fields: [vendorId], references: [id])
+  vendorId     Int
+  sharePercent Int
+  shares       GroupShare[]
+
+  @@unique([groupId, vendorId])
+}
+
+model GroupShare {
+  id            Int         @id @default(autoincrement())
+  member        GroupMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  memberId      Int
+  subOrder      SubOrder    @relation(fields: [subOrderId], references: [id], onDelete: Cascade)
+  subOrderId    Int
+  amountCents   Int
+  createdAt     DateTime    @default(now())
+
+  @@unique([memberId, subOrderId])
 }

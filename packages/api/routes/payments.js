@@ -4,6 +4,7 @@ const { PrismaClient } = require("@prisma/client");
 const { verifyBuyerToken } = require("../middleware/buyerAuth");
 const { splitAmount, verifySignature } = require("../lib/payments");
 const { recordAgentCommission } = require("./agents");
+const { recordGroupShares } = require("./groups");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -106,6 +107,7 @@ router.post("/webhook", async (req, res) => {
       }
       for (const sub of order.subOrders) {
         await recordAgentCommission(tx, sub);
+        await recordGroupShares(tx, sub);
       }
       return "PAID";
     });
@@ -118,4 +120,5 @@ router.post("/webhook", async (req, res) => {
 });
 
 module.exports = router;
+
 

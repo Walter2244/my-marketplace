@@ -25,6 +25,7 @@ const deliveryOptionRoutes = require("./routes/deliveryOptions");
 const districtRoutes = require("./routes/districts");
 const reviewDisputeRoutes = require("./routes/reviewsDisputes");
 const agentRoutesModule = require("./routes/agents");
+const groupRoutesModule = require("./routes/groups");
 
 // Initialize Express app
 const app = express();
@@ -80,6 +81,7 @@ app.use("/products", deliveryOptionRoutes);
 app.use("/districts", districtRoutes);
 app.use("/reviews", reviewDisputeRoutes);
 app.use("/agents", agentRoutesModule.router);
+app.use("/groups", groupRoutesModule.router);
 
 // Robust route printer for startup debugging
 function printRegisteredRoutes() {
@@ -140,6 +142,7 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 module.exports = app;
+
 
 
 
