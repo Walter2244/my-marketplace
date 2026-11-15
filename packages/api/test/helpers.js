@@ -44,6 +44,14 @@ async function stopServer() {
 
 // Empties the test database, children before parents so foreign keys don't block deletes
 async function resetDatabase() {
+  await prisma.groupShare.deleteMany();
+  await prisma.groupMember.deleteMany();
+  await prisma.producerGroup.deleteMany();
+  await prisma.agentCommission.deleteMany();
+  await prisma.agentLink.deleteMany();
+  await prisma.agent.deleteMany();
+  await prisma.dispute.deleteMany();
+  await prisma.review.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
   await prisma.product.deleteMany();
@@ -74,6 +82,7 @@ async function api(method, route, { token, body } = {}) {
 }
 
 module.exports = { BASE, prisma, startServer, stopServer, resetDatabase, createAdmin, api };
+
 
 
 
