@@ -1,4 +1,4 @@
-import type { Requester } from "./core";
+import type { Requester } from "./core.js";
 
 export type VendorSummary = { id: number; name: string; email: string; createdAt: string };
 export type VendorProfile = VendorSummary & { updatedAt: string };
@@ -30,3 +30,4 @@ export function createAccountsApi(request: Requester) {
     },
   };
 }
+

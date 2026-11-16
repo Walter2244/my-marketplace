@@ -1,11 +1,11 @@
-import { createRequester } from "./core";
-import { createAccountsApi } from "./accounts";
-import { createCatalogueApi } from "./catalogue";
+import { createRequester } from "./core.js";
+import { createAccountsApi } from "./accounts.js";
+import { createCatalogueApi } from "./catalogue.js";
 
-export { ApiError } from "./core";
-export type { Requester, RequestOptions } from "./core";
-export * from "./accounts";
-export * from "./catalogue";
+export { ApiError } from "./core.js";
+export type { Requester, RequestOptions } from "./core.js";
+export * from "./accounts.js";
+export * from "./catalogue.js";
 
 export function createApi(baseUrl: string) {
   const request = createRequester(baseUrl);
@@ -14,3 +14,4 @@ export function createApi(baseUrl: string) {
     catalogue: createCatalogueApi(request),
   };
 }
+

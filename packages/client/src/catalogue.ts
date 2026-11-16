@@ -1,4 +1,4 @@
-import type { Requester } from "./core";
+import type { Requester } from "./core.js";
 
 export type Category = { id: number; name: string; slug: string; level: number; parentId: number | null };
 export type CategoryNode = Category & { children: CategoryNode[] };
@@ -126,4 +126,5 @@ export function createCatalogueApi(request: Requester) {
     },
   };
 }
+
 
