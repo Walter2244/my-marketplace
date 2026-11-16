@@ -233,14 +233,17 @@ router.patch("/:id", verifyVendorToken, async (req, res) => {
     if (data.categoryId !== undefined) {
       const verifyProblem = await checkLivestockVerification(prisma, req.vendor.id, data.categoryId);
       if (verifyProblem) return res.status(403).json({ error: verifyProblem });
-    const locProblem = await checkLocation(prisma, req.body.province, req.body.district);
-    if (locProblem) return res.status(400).json({ error: locProblem });
+      const newRules = data.categoryId ? await ruleSetFor(prisma, data.categoryId) : null;
+      if (newRules && req.body.attributes === undefined) {
+        return res.status(400).json({ error: "changing category needs the attributes for the new category" });
+      }
+    }
+    if (req.body.province !== undefined || req.body.district !== undefined) {
+      const locProblem = await checkLocation(prisma, req.body.province, req.body.district);
+      if (locProblem) return res.status(400).json({ error: locProblem });
+    }
     if (req.body.province !== undefined) data.province = req.body.province;
     if (req.body.district !== undefined) data.district = req.body.district;
-    const ruleSet = finalCategory ? await ruleSetFor(prisma, finalCategory) : null;
-    const attrProblem = checkAttributes(ruleSet, req.body.attributes);
-    if (attrProblem) return res.status(400).json({ error: attrProblem });
-    }
     if (req.body.collectable !== undefined) {
       data.collectable = req.body.collectable === true;
     }
@@ -307,6 +310,7 @@ router.delete("/:id", verifyVendorToken, async (req, res) => {
 });
 
 module.exports = router;
+
 
 
 
