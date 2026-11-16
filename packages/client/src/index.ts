@@ -4,6 +4,10 @@ import { createCatalogueApi } from "./catalogue.js";
 import { createLivestockApi } from "./livestock.js";
 import { createCollectionApi } from "./collection.js";
 import { createVerificationApi } from "./verification.js";
+import { createAgentsApi } from "./agents.js";
+import { createGroupsApi } from "./groups.js";
+import { createReviewsApi } from "./reviews.js";
+import { createPriceIndexApi } from "./priceIndex.js";
 
 export { ApiError } from "./core.js";
 export type { Requester, RequestOptions } from "./core.js";
@@ -12,6 +16,10 @@ export * from "./catalogue.js";
 export * from "./livestock.js";
 export * from "./collection.js";
 export * from "./verification.js";
+export * from "./agents.js";
+export * from "./groups.js";
+export * from "./reviews.js";
+export * from "./priceIndex.js";
 
 export function createApi(baseUrl: string) {
   const request = createRequester(baseUrl);
@@ -21,5 +29,9 @@ export function createApi(baseUrl: string) {
     livestock: createLivestockApi(request),
     collection: createCollectionApi(request),
     verification: createVerificationApi(request),
+    agents: createAgentsApi(request),
+    groups: createGroupsApi(request),
+    reviews: createReviewsApi(request),
+    priceIndex: createPriceIndexApi(request),
   };
 }
