@@ -1,6 +1,7 @@
 {
     "name": "create-mercur",
     "private": true,
+    "packageManager": "npm@11.13.0",
     "scripts": {
         "build": "turbo run build",
         "lint": "turbo run lint",
@@ -51,8 +52,12 @@
         "node": ">=20"
     },
     "workspaces": [
-        "apps/admin",
-        "apps/vendor",
+        "apps/storefront",
+        "packages/client",
         "packages/api"
     ]
 }
+
+
+
+
