@@ -37,6 +37,8 @@ export type StoreSummary = {
   vendor: { id: number; name: string };
 };
 
+export type StockState = { id: number; title: string; quantity: number | null; status: "DRAFT" | "PUBLISHED"; updatedAt: string; inStock: boolean };
+
 export type ListParams = { limit?: number; skip?: number };
 
 export type ProductSearchParams = ListParams & {
@@ -114,9 +116,9 @@ export function createCatalogueApi(request: Requester) {
       remove: (token: string, id: number) =>
         request<{ message: string; id: number }>("DELETE", `/products/${id}`, { token }),
       setStock: (token: string, id: number, quantity: number) =>
-        request<unknown>("PUT", `/products/${id}/stock`, { token, body: { quantity } }),
+        request<StockState>("PUT", `/products/${id}/stock`, { token, body: { quantity } }),
       adjustStock: (token: string, id: number, change: number) =>
-        request<unknown>("POST", `/products/${id}/adjust`, { token, body: { change } }),
+        request<StockState>("POST", `/products/${id}/adjust`, { token, body: { change } }),
     },
     search: {
       products: (params: ProductSearchParams = {}) =>
@@ -124,3 +126,4 @@ export function createCatalogueApi(request: Requester) {
     },
   };
 }
+
