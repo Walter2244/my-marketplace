@@ -39,6 +39,8 @@ app.use(cors({
     "http://localhost:7000",
     "http://127.0.0.1:7000",
     "http://192.168.1.241:5173",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
     "https://192.168.1.241:7000"
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -144,6 +146,7 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 module.exports = app;
+
 
 
 
