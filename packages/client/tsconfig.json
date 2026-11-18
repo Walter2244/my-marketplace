@@ -6,10 +6,12 @@
     "strict": true,
     "noEmit": false,
     "outDir": "dist",
+    "rootDir": "src",
     "declaration": true,
     "lib": ["ES2022", "DOM"],
     "skipLibCheck": true
   },
   "include": ["src"]
 }
+
 
