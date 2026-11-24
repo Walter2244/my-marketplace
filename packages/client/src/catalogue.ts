@@ -107,6 +107,8 @@ export function createCatalogueApi(request: Requester) {
       list: (params: ListParams & { vendorId?: number; categoryId?: number } = {}) =>
         request<ProductSummary[]>("GET", "/products", { query: params }),
       get: (id: number) => request<ProductSummary>("GET", `/products/${id}`),
+      deliveryOptions: (id: number) =>
+        request<{ kind: "COLLECTION" | "FLAT_FEE" | "QUOTE"; feeCents: number; note: string | null }[]>("GET", `/products/${id}/delivery-options`),
       mine: (token: string, params: ListParams = {}) =>
         request<ProductSummary[]>("GET", "/products/mine", { token, query: params }),
       create: (token: string, input: ProductCreateInput) =>
@@ -126,5 +128,6 @@ export function createCatalogueApi(request: Requester) {
     },
   };
 }
+
 
 

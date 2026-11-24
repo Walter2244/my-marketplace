@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { api } from "./api";
 import { useSession } from "./session";
 
@@ -8,6 +8,9 @@ const pageStyle = { maxWidth: 420, margin: "0 auto", padding: "1rem", fontFamily
 export default function SignInPage() {
   const { signIn } = useSession();
   const navigate = useNavigate();
+  const location = useLocation();
+  // Return the buyer to the page they were trying to reach, or the cart if they came straight here
+  const destination = (location.state as { from?: string } | null)?.from ?? "/cart";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +23,7 @@ export default function SignInPage() {
     try {
       const result = await api.accounts.buyer.login({ email, password });
       signIn(result.token, email);
-      navigate("/cart");
+      navigate(destination, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not sign in");
     } finally {
@@ -41,7 +44,7 @@ export default function SignInPage() {
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ width: "100%" }} />
         </label>
         <button type="submit" disabled={busy} style={{ justifySelf: "start", padding: "0.5rem 1.25rem" }}>
-          {busy ? "Signing in�" : "Sign in"}
+          {busy ? "Signing in..." : "Sign in"}
         </button>
       </form>
       {error && <p role="alert" style={{ color: "#a00" }}>{error}</p>}
