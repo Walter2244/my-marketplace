@@ -100,9 +100,11 @@ export default function CartPage() {
 
           <div style={{ marginTop: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <strong style={{ fontSize: "1.2rem" }}>Total: {formatPrice(cart.totalCents, cart.currency)}</strong>
-            <button type="button" disabled={!cart.allAvailable} title={cart.allAvailable ? "" : "Fix the unavailable items first"}>
-              Checkout (coming next)
-            </button>
+            {cart.allAvailable ? (
+              <Link to="/checkout">Checkout</Link>
+            ) : (
+              <button type="button" disabled title="Fix the unavailable items first">Checkout</button>
+            )}
           </div>
         </>
       )}
