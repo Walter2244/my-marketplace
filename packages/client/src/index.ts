@@ -8,6 +8,8 @@ import { createAgentsApi } from "./agents.js";
 import { createGroupsApi } from "./groups.js";
 import { createReviewsApi } from "./reviews.js";
 import { createPriceIndexApi } from "./priceIndex.js";
+import { createCartApi } from "./cart.js";
+import { createOrdersApi } from "./orders.js";
 
 export { ApiError } from "./core.js";
 export type { Requester, RequestOptions } from "./core.js";
@@ -20,6 +22,8 @@ export * from "./agents.js";
 export * from "./groups.js";
 export * from "./reviews.js";
 export * from "./priceIndex.js";
+export * from "./cart.js";
+export * from "./orders.js";
 
 export function createApi(baseUrl: string) {
   const request = createRequester(baseUrl);
@@ -33,5 +37,7 @@ export function createApi(baseUrl: string) {
     groups: createGroupsApi(request),
     reviews: createReviewsApi(request),
     priceIndex: createPriceIndexApi(request),
+    cart: createCartApi(request),
+    orders: createOrdersApi(request),
   };
 }
